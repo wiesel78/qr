@@ -3,6 +3,7 @@
 coverage/
 dist/*
 !dist/index.html
+build
 build/*
 node_modules/
 *.log
