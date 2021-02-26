@@ -6,4 +6,4 @@ Web based QR-Scanner
 
 ## See also
 
-This client use [jsQR](https://github.com/cozmo/jsQR) for detect resolve QR-Codes
+This client use [jsQR](https://github.com/cozmo/jsQR) for detect and resolve QR-Codes
