@@ -67,7 +67,7 @@ export async function getBarcode(imageData : ImageData) : Promise<string | undef
         try {
             const barcodes = await barcodeDetector.detect(imageData);
             
-            return barcodes[0].rawValue;
+            return barcodes[0]?.rawValue;
         } catch (e) {
             console.error("Barcode detection failed:", e);
             return ;
