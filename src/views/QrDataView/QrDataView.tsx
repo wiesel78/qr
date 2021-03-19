@@ -9,6 +9,7 @@ export const QrDataView = () => {
 
     return (
         <Container
+            maxWidth="sm"
             style={{
                 display: "flex",
                 flexDirection: "column",
