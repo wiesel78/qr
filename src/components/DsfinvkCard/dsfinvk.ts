@@ -70,6 +70,7 @@ export interface DsfinvkData {
 }
 
 export interface DsfinvkProcessData {
+    rawData : string;
     type : DsfinvkReceiptType ;
     vat : DsfinvkProcessDataVat ;
     payment : DsfinvkPaymentItem[];
@@ -84,6 +85,7 @@ export interface DsfinvkProcessDataVat {
 }
 
 export interface DsfinvkPaymentItem {
+    rawData : string;
     total : number;
     type : DsfinvkPaymentType;
     currency : string;
@@ -149,12 +151,14 @@ export function getDsfinvkProcessData(data : string) : DsfinvkProcessData {
     const result = data.match(DsfinvkProcessDataRegex);
     if(!result)
         return {
+            rawData : data,
             type : "Beleg",
             vat : { vat1 : 0.0, vat2 : 0.0, vat3 : 0.0, vat4 : 0.0, vat5 : 0.0},
-            payment : [{type : "Bar", total : 0.0, currency : "EUR"}]
+            payment : [{rawData: "0.00:Bar",type : "Bar", total : 0.0, currency : "EUR"}]
         };
 
     return {
+        rawData : data,
         type : result[1] as DsfinvkReceiptType,
         vat : {
             vat1 : parseFloat(result[2]),
@@ -179,11 +183,66 @@ export const DsfinvkPaymentItemRegex = /(\d+\.\d\d):(Bar|Unbar):?(\w\w\w)?/;
 export function getDsfinvkPaymentItem(data : string) : DsfinvkPaymentItem {
     const result = data.match(DsfinvkPaymentItemRegex);
     if(!result)
-        return {total : 0.0, type : "Bar", currency : "EUR"};
+        return {rawData : data, total : 0.0, type : "Bar", currency : "EUR"};
     
     return {
+        rawData : data,
         total : parseFloat(result[1]),
         type : result[2] === "Unbar" ? "Unbar" : "Bar",
         currency : result.length > 3 ? result[3] : "EUR"
     };
+}
+
+
+
+export async function isValidDsfinvkSignature(data : string | DsfinvkData | DsfinvkQrCodeData | undefined) : Promise<boolean> {
+    if(!data)
+        return false;
+
+    if(typeof(data) === "string")
+        return await isValidDsfinvkSignature(getDsfinvkData(data));
+
+    const processData = typeof(data.processData) === "string" 
+        ? data.processData 
+        : data.processData.rawData;
+
+    const {signature, publicKey, sigAlg} = data;
+
+    const enc = new TextEncoder();
+    const encoded = enc.encode(processData);
+
+    const pub1 = base64ToArrayBuffer(publicKey)
+
+    try{
+        const key = await window.crypto.subtle.importKey(
+            "raw", 
+            pub1,
+            { name : "ECDSA", namedCurve : "P-384"},
+            false,
+            []);
+
+        const result = await window.crypto.subtle.verify(
+            {
+                name : "ECDSA",
+                hash : { name : "SHA-384"}
+            },
+            key,
+            base64ToArrayBuffer(signature),
+            encoded
+        );
+    
+        return result;
+    }catch(e){
+        console.log(e);
+        return false;
+    }
+}
+
+function base64ToArrayBuffer(base64 : string) {
+    const bin = window.atob(base64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0, strLen = bin.length; i < strLen; i++) {
+        bytes[i] = bin.charCodeAt(i);
+    }
+    return bytes;
 }
