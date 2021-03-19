@@ -25,7 +25,7 @@ export const Sidebar = ({ onClose, open, variant }: SidebarProps) => {
                 }>
                 {codes.map((code, index) => (
                     <ListItem component="a" key={code + index} href={code} target="_blank">
-                        <ListItemText primary={code} primaryTypographyProps={{ color: "textPrimary" }} />
+                        <ListItemText primary={code} primaryTypographyProps={{ color: "textPrimary", style:{fontFamily:"monospace", wordWrap:"break-word"} }} />
                     </ListItem>
                 ))}
             </List>

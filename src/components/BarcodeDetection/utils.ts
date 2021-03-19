@@ -1,4 +1,5 @@
 import jsQR from "jsqr";
+import { isDsfinvkData } from "../DsfinvkCard/dsfinvk";
 
 export type BarcodeFormat = 
     "aztec" |
@@ -42,41 +43,57 @@ export declare var BarcodeDetector : BarcodeDetector;
 
 
 export async function getBarcode(imageData : ImageData) : Promise<string | undefined> {
-    if (
-        "BarcodeDetector" in window &&
-        (await BarcodeDetector.getSupportedFormats()).includes("qr_code")
-    ) {
-        const barcodeDetector = new BarcodeDetector({
-            formats: [
-                "aztec",
-                "code_128",
-                "code_39",
-                "code_93",
-                "codabar",
-                "data_matrix",
-                "ean_13",
-                "ean_8",
-                "itf",
-                "pdf417",
-                "qr_code",
-                "upc_a",
-                "upc_e",
-            ],
-        });
+    // if (
+    //     "BarcodeDetector" in window &&
+    //     (await BarcodeDetector.getSupportedFormats()).includes("qr_code")
+    // ) {
+    //     const barcodeDetector = new BarcodeDetector({
+    //         formats: [
+    //             "aztec",
+    //             "code_128",
+    //             "code_39",
+    //             "code_93",
+    //             "codabar",
+    //             "data_matrix",
+    //             "ean_13",
+    //             "ean_8",
+    //             "itf",
+    //             "pdf417",
+    //             "qr_code",
+    //             "upc_a",
+    //             "upc_e",
+    //         ],
+    //     });
 
-        try {
-            const barcodes = await barcodeDetector.detect(imageData);
+    //     try {
+    //         const barcodes = await barcodeDetector.detect(imageData);
             
-            return barcodes[0]?.rawValue;
-        } catch (e) {
-            console.error("Barcode detection failed:", e);
-            return ;
-        }
-    }
-    else
-    {
+    //         return barcodes[0]?.rawValue;
+    //     } catch (e) {
+    //         console.error("Barcode detection failed:", e);
+    //         return ;
+    //     }
+    // }
+    // else
+    // {
         const code = jsQR(imageData.data, imageData.width, imageData.height);
 
         return code?.data;
-    }
+    // }
+}
+
+export enum QrCodeType {
+    Any,
+    Url,
+    Dsfinvk
+}
+
+export function getCodeType(data : string) : QrCodeType {
+    if(data.match(/(https?:\/\/[^\s]+)/))
+        return QrCodeType.Url;
+
+    if(isDsfinvkData(data))
+        return QrCodeType.Dsfinvk;
+
+    return QrCodeType.Any;
 }

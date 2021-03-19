@@ -189,23 +189,6 @@ export function BarcodeDetection(props: BarcodeDetectionProps) {
                     style={{ width: "100%", display: code ? "none" : "block" }}
                 />
             </ContainerDiv>
-
-            <Typography
-                color="textPrimary"
-                style={{ display: code ? "none" : "block" }}
-            >
-                {code ? (
-                    <a
-                        href={code ?? ""}
-                        target="_blank"
-                        style={{ color: "cornflowerblue" }}
-                    >
-                        {code}
-                    </a>
-                ) : (
-                    helpText
-                )}
-            </Typography>
         </>
     );
 }

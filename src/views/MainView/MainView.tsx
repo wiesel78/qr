@@ -1,6 +1,8 @@
 import * as React from "react";
 import { useCurrentCode } from "../../store";
 import { BarcodeDetection } from "../../components";
+import { Link } from "@material-ui/core";
+import { QrDataView } from "../QrDataView/QrDataView";
 
 
 export const MainView = () => {
@@ -16,6 +18,9 @@ export const MainView = () => {
             }}
         >
             <BarcodeDetection code={code} onChangeCode={setCode} />
+
+            <QrDataView />            
+
         </div>
     );
 };
